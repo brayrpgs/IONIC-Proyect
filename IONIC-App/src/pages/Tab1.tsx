@@ -1,10 +1,9 @@
 import { IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherEventDetail } from '@ionic/react';
 
-import './Tab1.css';
 import { FetchGames, Games, URL_BASE } from '../utils/Connections';
 import { useEffect, useState } from 'react';
 import CreateGame from '../components/CreateGame';
-
+import "./Tab1.css"
 
 
 const Tab1: React.FC = () => {
@@ -20,9 +19,9 @@ const Tab1: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="primary">
-            <CreateGame />
+            <CreateGame data={data} setData={setData} />
           </IonButtons>
-          <IonTitle className='title-game'>Games</IonTitle>
+          <IonTitle className='.io-title title-game'>Games</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen >
