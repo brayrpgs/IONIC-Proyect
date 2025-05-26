@@ -1,10 +1,10 @@
 import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonPage, IonRefresher, IonRefresherContent, IonRow, IonTitle, IonToolbar, RefresherEventDetail } from '@ionic/react';
 
-import { FetchGames, Games, URL_BASE } from '../utils/Connections';
+import { DeleteGame, FetchGames, Games, URL_BASE } from '../utils/Connections';
 import { useEffect, useState } from 'react';
 import CreateGame from '../components/CreateGame';
 import "./Tab1.css"
-import { eyeOutline, trashOutline } from 'ionicons/icons';
+import { createOutline, eyeOutline, trashOutline } from 'ionicons/icons';
 
 
 const Tab1: React.FC = () => {
@@ -80,10 +80,25 @@ const Tab1: React.FC = () => {
                       expand="block"
                       size='small'
                       shape='round'
+                      onClick={async () => {
+                        await DeleteGame(String(value.id))
+                      }}
                     >
                       Delete
                       <IonIcon slot="end" icon={trashOutline}></IonIcon>
                     </IonButton>
+
+                    <IonButton
+                      fill='outline'
+                      className='ion-button edit'
+                      expand="block"
+                      size='small'
+                      shape='round'
+                    >
+                      Edit game
+                      <IonIcon slot="end" icon={createOutline}></IonIcon>
+                    </IonButton>
+
                     <IonButton
                       fill='outline'
                       className='ion-button show'
@@ -94,6 +109,8 @@ const Tab1: React.FC = () => {
                       Show Reviews
                       <IonIcon slot="end" icon={eyeOutline}></IonIcon>
                     </IonButton>
+
+
                   </IonRow>
                 </IonGrid>
               </IonCardContent>

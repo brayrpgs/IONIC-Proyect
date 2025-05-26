@@ -11,3 +11,8 @@
     --color: #f6f8fc;
     --border-color: #f6f8fc;
 }
+
+.ion-button.edit {
+    --color: #ffc409;
+    --border-color: #ffc409;
+}
