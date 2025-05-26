@@ -1,9 +1,10 @@
-import { IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, RefresherEventDetail } from '@ionic/react';
+import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonPage, IonRefresher, IonRefresherContent, IonRow, IonTitle, IonToolbar, RefresherEventDetail } from '@ionic/react';
 
 import { FetchGames, Games, URL_BASE } from '../utils/Connections';
 import { useEffect, useState } from 'react';
 import CreateGame from '../components/CreateGame';
 import "./Tab1.css"
+import { eyeOutline, trashOutline } from 'ionicons/icons';
 
 
 const Tab1: React.FC = () => {
@@ -30,7 +31,9 @@ const Tab1: React.FC = () => {
         }}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
-        <p>Pull this content down to trigger the refresh.</p>
+        <IonItem>
+          <p>Pull this content down to trigger the refresh.</p>
+        </IonItem>
         {
           data.map((value, index) => (
             <IonCard key={index}>
@@ -69,6 +72,30 @@ const Tab1: React.FC = () => {
                     </tr>
                   </tbody>
                 </table>
+                <IonGrid >
+                  <IonRow >
+                    <IonButton
+                      fill='outline'
+                      className='ion-button delete'
+                      expand="block"
+                      size='small'
+                      shape='round'
+                    >
+                      Delete
+                      <IonIcon slot="end" icon={trashOutline}></IonIcon>
+                    </IonButton>
+                    <IonButton
+                      fill='outline'
+                      className='ion-button show'
+                      expand="block"
+                      size='small'
+                      shape='round'
+                    >
+                      Show Reviews
+                      <IonIcon slot="end" icon={eyeOutline}></IonIcon>
+                    </IonButton>
+                  </IonRow>
+                </IonGrid>
               </IonCardContent>
             </IonCard>
           ))

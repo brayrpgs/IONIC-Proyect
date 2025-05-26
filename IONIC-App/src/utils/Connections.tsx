@@ -63,3 +63,50 @@ export const SendGame = async (game: GameToSend) => {
         throw error;
     }
 }
+
+export const DeleteGame = async (id: string) => {
+    try {
+        console.log("Starting the request...");
+        const res = await fetch(URL_GAMES + "/" + id,
+            {
+                method: "DELETE",
+            }
+        );
+        console.log("Request completed successfully...");
+        console.log("Checking the response...");
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        console.log("Converting to JSON...");
+        const result = await res.json();
+        console.log("results is...", result);
+        return result;
+    } catch (error) {
+        console.error("Error fetching games:", error);
+        throw error;
+    }
+}
+
+export const UpdateGame = async (game: GameToSend) => {
+    try {
+        const form = new FormData()
+        form.append("title", game.title)
+        form.append("image", game.image)
+        form.append("platform", game.platform)
+        form.append("hoursPlayed", game.hoursPlayed)
+        form.append("isCompleted", game.isCompleted)
+        form.append("genre", game.genre)
+        console.log("Starting the request...");
+        const res = await fetch(URL_GAMES, {
+            body: form,
+            method: "PUT",
+
+        })
+        console.log("Checking the response...");
+        const result: Games = await res.json()
+        return result
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}

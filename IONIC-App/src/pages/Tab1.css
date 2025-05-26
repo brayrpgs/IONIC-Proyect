@@ -1,3 +1,13 @@
-.io-title.title-game{
+.io-title.title-game {
     font-size: 2rem;
+}
+
+.ion-button.delete {
+    --color: #c5000f;
+    --border-color: #c5000f;
+}
+
+.ion-button.show {
+    --color: #f6f8fc;
+    --border-color: #f6f8fc;
 }
