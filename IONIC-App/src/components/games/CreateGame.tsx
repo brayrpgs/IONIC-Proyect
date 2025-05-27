@@ -1,8 +1,8 @@
-import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
-import { IonButton, IonButtons, IonCheckbox, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonModal, IonTitle, IonToolbar } from '@ionic/react';
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import { IonButton, IonButtons, IonCheckbox, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonModal, IonTitle, IonToast, IonToolbar } from '@ionic/react';
 import { addCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import "./CreateGame.css"
-import { Games, SendGame } from '../utils/Connections';
+import { Games, SendGame } from '../../utils/Connections';
 
 
 function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[]>>, data: Games[] }) {
@@ -14,6 +14,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
     const genre = useRef<HTMLIonInputElement>(null);
     const img = useRef<HTMLInputElement>(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [showToast, setShowToast] = useState(false);
 
     const handlerSend = async () => {
         if (title.current?.value && plataform.current?.value
@@ -22,6 +23,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
             && (isCompleted.current?.checked !== undefined)
             && genre.current?.value) {
             const result = await SendGame({
+                id: 0,
                 genre: String(genre.current?.value),
                 hoursPlayed: String(hoursPlayed.current?.value),
                 title: String(title.current?.value),
@@ -31,6 +33,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
             })
             if (result) {
                 setData([...data, result])
+                setShowToast(true);
                 setIsOpen(false)
                 modal.current?.dismiss()
             }
@@ -74,7 +77,8 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
                             slot="start">
 
                             <IonButton
-                                onClick={() => {
+                                onClick={(e) => {
+                                    (e.currentTarget as HTMLElement).blur()
                                     setIsOpen(false)
                                     modal.current?.dismiss()
                                 }}
@@ -84,7 +88,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
 
                         </IonButtons>
 
-                        <IonTitle className='title-modal'>Create a new game!</IonTitle>
+                        <IonTitle className='title-modal'>Create a new game</IonTitle>
 
                         <IonButtons
                             slot="end"
@@ -172,6 +176,14 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
                     </IonItem>
                 </IonContent>
             </IonModal>
+            <IonToast
+                isOpen={showToast}
+                onDidDismiss={() => setShowToast(false)}
+                message="Game successfully created!"
+                duration={2000}
+                color="success"
+                position="bottom"
+            />
         </>
     );
 }

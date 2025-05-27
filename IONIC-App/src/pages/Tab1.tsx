@@ -1,20 +1,27 @@
-import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonPage, IonRefresher, IonRefresherContent, IonRow, IonTitle, IonToolbar, RefresherEventDetail } from '@ionic/react';
+import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonModal, IonPage, IonRefresher, IonRefresherContent, IonRow, IonTitle, IonToast, IonToolbar, RefresherEventDetail } from '@ionic/react';
 
-import { DeleteGame, FetchGames, Games, URL_BASE } from '../utils/Connections';
-import { useEffect, useState } from 'react';
-import CreateGame from '../components/CreateGame';
+import { FetchGames, Games, URL_BASE } from '../utils/Connections';
+import { useEffect, useRef, useState } from 'react';
+import CreateGame from '../components/games/CreateGame';
 import "./Tab1.css"
 import { createOutline, eyeOutline, trashOutline } from 'ionicons/icons';
-
+import DeleteGameModal from '../components/games/DeleteGameModal';
+import UpdateGameModal from '../components/games/UpdateGameModal';
 
 const Tab1: React.FC = () => {
   const [data, setData] = useState<Games[]>([])
+  const [gameToDelete, setGameToDelete] = useState<Games | null>(null);
+  const [gameToUpdate, setGameToUpdate] = useState<Games | null>(null);
+  const toast = useRef<HTMLIonToastElement>(null);
+
   async function handleFetchGames() {
     setData(await FetchGames())
   }
+
   useEffect(() => {
     handleFetchGames()
   }, [])
+
   return (
     <IonPage>
       <IonHeader>
@@ -80,8 +87,9 @@ const Tab1: React.FC = () => {
                       expand="block"
                       size='small'
                       shape='round'
-                      onClick={async () => {
-                        await DeleteGame(String(value.id))
+                      onClick={(e) => {
+                        (e.currentTarget as HTMLElement).blur()
+                        setGameToDelete(value)
                       }}
                     >
                       Delete
@@ -94,6 +102,10 @@ const Tab1: React.FC = () => {
                       expand="block"
                       size='small'
                       shape='round'
+                      onClick={(e) => {
+                        (e.currentTarget as HTMLElement).blur()
+                        setGameToUpdate(value)
+                      }}
                     >
                       Edit game
                       <IonIcon slot="end" icon={createOutline}></IonIcon>
@@ -114,12 +126,37 @@ const Tab1: React.FC = () => {
                   </IonRow>
                 </IonGrid>
               </IonCardContent>
+              <IonModal isOpen={gameToDelete !== null} onDidDismiss={() => setGameToDelete(null)}>
+                {gameToDelete && (
+                  <DeleteGameModal
+                    gameId={gameToDelete.id.toString()}
+                    gameName={gameToDelete.title}
+                    onClose={() => setGameToDelete(null)}
+                    updateGames={handleFetchGames}
+                    toast = {toast}
+                  />
+                )}
+              </IonModal>
+              <IonModal isOpen={gameToUpdate !== null} onDidDismiss={() => setGameToUpdate(null)}>
+                {gameToUpdate && (
+                  <UpdateGameModal
+                    game={gameToUpdate}
+                    onClose={() => setGameToUpdate(null)}
+                    updateGames={handleFetchGames}
+                  />
+                )}
+              </IonModal>
             </IonCard>
           ))
         }
 
+        <IonToast
+          position="bottom"
+          ref={toast}
+        />
       </IonContent>
     </IonPage>
+
   );
 };
 

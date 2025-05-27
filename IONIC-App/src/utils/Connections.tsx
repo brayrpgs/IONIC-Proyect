@@ -12,8 +12,9 @@ export interface Games {
 }
 
 export interface GameToSend {
+    id: number,
     title: string,
-    image: Blob,
+    image: Blob | null,
     platform: string,
     hoursPlayed: string,
     isCompleted: string,
@@ -44,7 +45,9 @@ export const SendGame = async (game: GameToSend) => {
     try {
         const form = new FormData()
         form.append("title", game.title)
-        form.append("image", game.image)
+        if (game.image !== null) {
+            form.append('image', game.image);
+        }
         form.append("platform", game.platform)
         form.append("hoursPlayed", game.hoursPlayed)
         form.append("isCompleted", game.isCompleted)
@@ -66,32 +69,42 @@ export const SendGame = async (game: GameToSend) => {
 
 export const DeleteGame = async (id: string) => {
     try {
-        console.log("Starting the request...");
-        const res = await fetch(URL_GAMES + "/" + id,
-            {
-                method: "DELETE",
-            }
-        );
-        console.log("Request completed successfully...");
-        console.log("Checking the response...");
+        const res = await fetch(URL_GAMES + "/" + id, {
+            method: "DELETE",
+        });
+
         if (!res.ok) {
-            throw new Error(`HTTP error! Status: ${res.status}`);
+            const contentType = res.headers.get("content-type");
+            let errorMessage = "Unknown error occurred";
+
+            if (contentType?.includes("application/json")) {
+                const errorData = await res.json();
+                errorMessage = errorData.message || errorMessage;
+            } else {
+                errorMessage = await res.text();
+            }
+
+            console.error("Server error:", errorMessage);
+            throw new Error(errorMessage);
         }
-        console.log("Converting to JSON...");
+
         const result = await res.json();
-        console.log("results is...", result);
+        console.log("Result is...", result);
         return result;
+
     } catch (error) {
-        console.error("Error fetching games:", error);
+        console.error("Error deleting game:", error);
         throw error;
     }
-}
+};
 
 export const UpdateGame = async (game: GameToSend) => {
+    console.log("Updating game with ID:", game);
     try {
         const form = new FormData()
+        form.append("id", game.id.toString())
         form.append("title", game.title)
-        form.append("image", game.image)
+        form.append("image", game.image instanceof File ? game.image : new File([""], "", { type: "application/octet-stream" }));
         form.append("platform", game.platform)
         form.append("hoursPlayed", game.hoursPlayed)
         form.append("isCompleted", game.isCompleted)
