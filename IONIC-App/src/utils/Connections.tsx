@@ -37,6 +37,14 @@ export interface ReviewSend {
   "rating": string,
 }
 
+export interface ReviewUpdate {
+  "id": number,
+  "gameId": string,
+  "reviewerName": string,
+  "comment": string,
+  "rating": string,
+}
+
 export const FetchGames = async (): Promise<Games[]> => {
   try {
     const res = await fetch(URL_GAMES);
@@ -174,16 +182,17 @@ export const FetchReviewsById = async (id: string): Promise<ReviewGet[]> => {
     }
     console.log("Converting to JSON...");
     const result: ReviewGet[] = await res.json();
-    console.log("Returning Games results...", result);
+    console.log("Returning reviews results...", result);
     return result;
 
   } catch (error) {
-    console.error("Error fetching games:", error);
+    console.error("Error fetching reviews:", error);
     throw error;
   }
 }
 
 export const SendReview = async (review: ReviewSend) => {
+  console
   try {
     const form = new FormData()
     form.append("gameId", review.gameId)
@@ -205,3 +214,57 @@ export const SendReview = async (review: ReviewSend) => {
   }
 }
 
+export const UpdateReview = async (review: ReviewUpdate) => {
+  console.log("Updating review with ID:", review);
+  try {
+    const form = new FormData()
+    form.append("id", String(review.id)) 
+    form.append("gameId", review.gameId)
+    form.append('reviewerName', review.reviewerName);
+    form.append("comment", review.comment)
+    form.append("rating", review.rating)
+    console.log("Starting the request...");
+    const res = await fetch(URL_REVIEWS, {
+      body: form,
+      method: "PUT",
+
+    })
+    console.log("Checking the response...");
+    const result: ReviewGet = await res.json()
+    return result
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+export const DeleteReview = async (id: string) => {
+  try {
+    const res = await fetch(URL_REVIEWS + "/" + id, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      const contentType = res.headers.get("content-type");
+      let errorMessage = "Unknown error occurred";
+
+      if (contentType?.includes("application/json")) {
+        const errorData = await res.json();
+        errorMessage = errorData.message || errorMessage;
+      } else {
+        errorMessage = await res.text();
+      }
+
+      console.error("Server error:", errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const result = await res.json();
+    console.log("Result is...", result);
+    return result;
+
+  } catch (error) {
+    console.error("Error deleting review:", error);
+    throw error;
+  }
+};

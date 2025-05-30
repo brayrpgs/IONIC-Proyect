@@ -1,18 +1,22 @@
-import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonPage, IonRefresher, IonRefresherContent, IonRow, IonTitle, IonToolbar, RefresherEventDetail } from '@ionic/react';
+import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonModal, IonPage, IonRefresher, IonRefresherContent, IonRow, IonTitle, IonToast, IonToolbar, RefresherEventDetail } from '@ionic/react';
 import './Tab2.css';
 import { useLocation } from 'react-router';
-import { useEffect, useState } from 'react';
-import { FetchReviewsById, ReviewGet } from '../utils/Connections';
+import { useEffect, useRef, useState } from 'react';
+import { FetchReviewsById, ReviewGet, ReviewSend, ReviewUpdate } from '../utils/Connections';
 import { createOutline, trashOutline } from 'ionicons/icons';
 import CreateReview from '../components/reviews/CreateReview';
+import DeleteReviewModal from '../components/reviews/DeleteReviewModal';
+import UpdateReviewModal from '../components/reviews/UpdateReviewModal';
 
 const Tab2: React.FC = () => {
   //
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const [isCompleted, setIsCompleted] = useState(true)  
   const id = params.get('id');
   const game = params.get('name');
+  const [reviewToDelete, setReviewToDelete] = useState<ReviewGet | null>(null);
+  const [reviewToUpdate, setReviewToUpdate] = useState<ReviewUpdate | null>(null);
+  const toast = useRef<HTMLIonToastElement>(null);
   //
 
   //
@@ -92,6 +96,7 @@ const Tab2: React.FC = () => {
                       shape='round'
                       onClick={(e) => {
                         (e.currentTarget as HTMLElement).blur()
+                        setReviewToDelete(value)
                       }}
                     >
                       Delete
@@ -105,7 +110,17 @@ const Tab2: React.FC = () => {
                       size='small'
                       shape='round'
                       onClick={(e) => {
-                        (e.currentTarget as HTMLElement).blur()
+                        (e.currentTarget as HTMLElement).blur();
+
+                        const reviewUpdate: ReviewUpdate = {
+                          id: value.id,
+                          gameId: String(value.gameId),
+                          reviewerName: value.reviewerName,
+                          comment: value.comment,
+                          rating: String(value.rating),
+                        };
+
+                        setReviewToUpdate(reviewUpdate);
                       }}
                     >
                       Edit review
@@ -117,7 +132,40 @@ const Tab2: React.FC = () => {
             </IonCard>
           ))
         }
+
+        <IonModal isOpen={reviewToDelete !== null} onDidDismiss={() => setReviewToDelete(null)}>
+          {reviewToDelete && (
+            <DeleteReviewModal
+              reviewId={reviewToDelete.id.toString()}
+              onClose={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                setReviewToDelete(null);
+              }}
+              updateReviews={() => handleFetchReviewById(id)}
+              toast={toast}
+            />
+          )}
+        </IonModal>
+        <IonModal isOpen={reviewToUpdate !== null} onDidDismiss={() => setReviewToUpdate(null)}>
+          {reviewToUpdate && (
+            <UpdateReviewModal
+              review={reviewToUpdate}
+              onClose={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                setReviewToUpdate(null);
+              }}
+              updateReviews={() => handleFetchReviewById(id)}
+              toast={toast}
+            />
+          )}
+        </IonModal>
+        <IonToast
+          position="bottom"
+          ref={toast}
+        />
+
       </IonContent>
+
     </IonPage>
   );
 };
