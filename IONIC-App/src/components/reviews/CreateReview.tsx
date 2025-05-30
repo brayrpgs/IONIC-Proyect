@@ -165,7 +165,7 @@ function CreateReview({ setData, data, gameId }: { setData: Dispatch<SetStateAct
             <IonToast
                 isOpen={showToast}
                 onDidDismiss={() => setShowToast(false)}
-                message="Game successfully created!"
+                message="Review successfully created!"
                 duration={2000}
                 color="success"
                 position="bottom"
