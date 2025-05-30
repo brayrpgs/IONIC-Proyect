@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
+import  { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonModal, IonTitle, IonToast, IonToolbar } from '@ionic/react';
 import { addCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import "./CreateGame.css"

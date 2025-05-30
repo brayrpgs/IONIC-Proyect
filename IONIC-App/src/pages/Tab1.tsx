@@ -117,6 +117,7 @@ const Tab1: React.FC = () => {
                       expand="block"
                       size='small'
                       shape='round'
+                      href={`/tab2?id=${value.id}&name=${value.title}`}
                     >
                       Show Reviews
                       <IonIcon slot="end" icon={eyeOutline}></IonIcon>
