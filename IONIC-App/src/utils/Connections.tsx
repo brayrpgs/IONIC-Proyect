@@ -23,16 +23,11 @@ export interface GameToSend {
 
 export const FetchGames = async (): Promise<Games[]> => {
     try {
-        console.log("Starting the request...");
         const res = await fetch(URL_GAMES);
-        console.log("Request completed successfully...");
-        console.log("Checking the response...");
         if (!res.ok) {
             throw new Error(`HTTP error! Status: ${res.status}`);
         }
-        console.log("Converting to JSON...");
         const result: Games[] = await res.json();
-        console.log("Returning Games results...", result);
         return result;
 
     } catch (error) {
@@ -43,29 +38,40 @@ export const FetchGames = async (): Promise<Games[]> => {
 
 export const SendGame = async (game: GameToSend) => {
     try {
-        const form = new FormData()
-        form.append("title", game.title)
-        if (game.image !== null) {
-            form.append('image', game.image);
+      const form = new FormData();
+      form.append("title", game.title);
+      if (game.image !== null && game.image !== undefined) {
+        form.append("image", game.image);
+      }
+      form.append("platform", game.platform);
+      form.append("hoursPlayed", game.hoursPlayed);
+      form.append("isCompleted", game.isCompleted);
+      form.append("genre", game.genre);
+  
+      const res = await fetch(URL_GAMES, {
+        method: "POST",
+        body: form,
+      });
+  
+      if (!res.ok) {
+        let errorMessage = await res.text();
+        try {
+          const json = JSON.parse(errorMessage);
+          errorMessage = json.message || JSON.stringify(json);
+        } catch {
+          
         }
-        form.append("platform", game.platform)
-        form.append("hoursPlayed", game.hoursPlayed)
-        form.append("isCompleted", game.isCompleted)
-        form.append("genre", game.genre)
-        console.log("Starting the request...");
-        const res = await fetch(URL_GAMES, {
-            body: form,
-            method: "POST",
-
-        })
-        console.log("Checking the response...");
-        const result: Games = await res.json()
-        return result
+        throw new Error(`Error ${res.status}: ${errorMessage}`);
+      }
+  
+      const result: Games = await res.json();
+      return result;
+  
     } catch (error) {
-        console.log(error);
-        throw error;
+      console.log(error);
+      throw error;
     }
-}
+  };
 
 export const DeleteGame = async (id: string) => {
     try {
@@ -99,27 +105,40 @@ export const DeleteGame = async (id: string) => {
 };
 
 export const UpdateGame = async (game: GameToSend) => {
-    console.log("Updating game with ID:", game);
     try {
-        const form = new FormData()
-        form.append("id", game.id.toString())
-        form.append("title", game.title)
-        form.append("image", game.image instanceof File ? game.image : new File([""], "", { type: "application/octet-stream" }));
-        form.append("platform", game.platform)
-        form.append("hoursPlayed", game.hoursPlayed)
-        form.append("isCompleted", game.isCompleted)
-        form.append("genre", game.genre)
-        console.log("Starting the request...");
-        const res = await fetch(URL_GAMES, {
-            body: form,
-            method: "PUT",
-
-        })
-        console.log("Checking the response...");
-        const result: Games = await res.json()
-        return result
+      const form = new FormData();
+      form.append("id", game.id.toString());
+      form.append("title", game.title);
+      form.append("image", game.image instanceof File ? game.image : new File([""], "", { type: "application/octet-stream" }));
+      form.append("platform", game.platform);
+      form.append("hoursPlayed", game.hoursPlayed);
+      form.append("isCompleted", game.isCompleted);
+      form.append("genre", game.genre);
+  
+      const res = await fetch(URL_GAMES, {
+        body: form,
+        method: "PUT",
+      });
+  
+      if (!res.ok) {
+        
+        let errorMessage = await res.text();
+        try {
+          
+          const json = JSON.parse(errorMessage);
+          errorMessage = json.message || JSON.stringify(json);
+        } catch {
+          
+        }
+        throw new Error(`Error ${res.status}: ${errorMessage}`);
+      }
+  
+      const result: Games = await res.json();
+      return result;
+  
     } catch (error) {
-        console.log(error);
-        throw error;
+      console.log(error);
+      throw error;
     }
-}
+  };
+  

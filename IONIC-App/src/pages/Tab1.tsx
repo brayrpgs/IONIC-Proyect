@@ -17,7 +17,7 @@ const Tab1: React.FC = () => {
   async function handleFetchGames() {
     setData(await FetchGames())
   }
-
+  
   useEffect(() => {
     handleFetchGames()
   }, [])
@@ -126,29 +126,38 @@ const Tab1: React.FC = () => {
                   </IonRow>
                 </IonGrid>
               </IonCardContent>
-              <IonModal isOpen={gameToDelete !== null} onDidDismiss={() => setGameToDelete(null)}>
-                {gameToDelete && (
-                  <DeleteGameModal
-                    gameId={gameToDelete.id.toString()}
-                    gameName={gameToDelete.title}
-                    onClose={() => setGameToDelete(null)}
-                    updateGames={handleFetchGames}
-                    toast = {toast}
-                  />
-                )}
-              </IonModal>
-              <IonModal isOpen={gameToUpdate !== null} onDidDismiss={() => setGameToUpdate(null)}>
-                {gameToUpdate && (
-                  <UpdateGameModal
-                    game={gameToUpdate}
-                    onClose={() => setGameToUpdate(null)}
-                    updateGames={handleFetchGames}
-                  />
-                )}
-              </IonModal>
+
             </IonCard>
           ))
         }
+
+        <IonModal isOpen={gameToDelete !== null} onDidDismiss={() => setGameToDelete(null)}>
+          {gameToDelete && (
+            <DeleteGameModal
+              gameId={gameToDelete.id.toString()}
+              gameName={gameToDelete.title}
+              onClose={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                setGameToDelete(null);
+              }}
+              updateGames={handleFetchGames}
+              toast={toast}
+            />
+          )}
+        </IonModal>
+        <IonModal isOpen={gameToUpdate !== null} onDidDismiss={() => setGameToUpdate(null)}>
+          {gameToUpdate && (
+            <UpdateGameModal
+              game={gameToUpdate}
+              onClose={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                setGameToUpdate(null);
+              }}
+              updateGames={handleFetchGames}
+              toast={toast}
+            />
+          )}
+        </IonModal>
 
         <IonToast
           position="bottom"

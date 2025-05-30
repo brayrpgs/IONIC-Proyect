@@ -16,7 +16,7 @@ const DeleteGameModal: React.FC<DeleteConfirmModalProps> = ({ gameId, gameName, 
     async function deleteGame(gameId: string | null) {
         try {
           await DeleteGame(gameId as string);
-
+            
           if(toast.current) {
             toast.current.message = "Game successfully deleted!";
             toast.current.color = "success";
@@ -26,12 +26,24 @@ const DeleteGameModal: React.FC<DeleteConfirmModalProps> = ({ gameId, gameName, 
                 updateGames();
                 return { data: undefined, role: undefined }; 
             };
+            await toast.current.present();
           }
           
           onClose();
           updateGames();
         } catch (error: any) {
           
+            if (toast.current) {
+                toast.current.message = "Cannot delete the game because it has associated reviews.";
+                toast.current.color = "danger";
+                toast.current.duration = 2500;
+                toast.current.isOpen = true;
+                toast.current.onDidDismiss = async () => {
+                    return { data: undefined, role: undefined }; 
+                };
+                await toast.current.present();
+            }
+            
         }
       }
 
