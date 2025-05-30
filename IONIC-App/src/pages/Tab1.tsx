@@ -144,7 +144,6 @@ const Tab1: React.FC = () => {
               updateGames={handleFetchGames}
               toast={toast}
             />
-            
           )}
         </IonModal>
         <IonModal isOpen={gameToUpdate !== null} onDidDismiss={() => setGameToUpdate(null)}>
