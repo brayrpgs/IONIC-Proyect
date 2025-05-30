@@ -15,32 +15,44 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
     const img = useRef<HTMLInputElement>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+    const [toastColor, setToastColor] = useState("");
+
+    function showCustomToast(message: string, color: string) {
+        setToastMessage(message);
+        setToastColor(color);
+        setShowToast(true);
+    }
 
     const handlerSend = async () => {
-        if (title.current?.value && plataform.current?.value
-            && hoursPlayed.current?.value
-            && (img.current?.files !== null && img.current?.files !== undefined)
-            && (isCompleted.current?.checked !== undefined)
-            && genre.current?.value) {
-            const result = await SendGame({
-                id: 0,
-                genre: String(genre.current?.value),
-                hoursPlayed: String(hoursPlayed.current?.value),
-                title: String(title.current?.value),
-                platform: String(plataform.current?.value),
-                image: img.current.files[0],
-                isCompleted: String(isCompleted.current?.checked)
-            })
-            if (result) {
-                setData([...data, result])
-                setShowToast(true);
-                setIsOpen(false)
-                modal.current?.dismiss()
+        try {
+            if (title.current?.value && plataform.current?.value
+                && hoursPlayed.current?.value
+                && (img.current?.files && img.current.files.length > 0)
+                && (isCompleted.current?.checked !== undefined)
+                && genre.current?.value) {
+                const result = await SendGame({
+                    id: 0,
+                    genre: String(genre.current?.value),
+                    hoursPlayed: String(hoursPlayed.current?.value),
+                    title: String(title.current?.value),
+                    platform: String(plataform.current?.value),
+                    image: img.current.files[0],
+                    isCompleted: String(isCompleted.current?.checked)
+                })
+                if (result) {
+                    setData([...data, result])
+                    showCustomToast("Game successfully created!", "success");
+                    setIsOpen(false)
+                    modal.current?.dismiss()
+                }
+
+            } else {
+                showCustomToast("Please complete all required fields. The image upload is required!", "warning");
+
             }
-
-        } else {
-            console.log("error");
-
+        } catch (error: any) {
+            showCustomToast("A game with this title already exists. Please choose a different title.", "danger");
         }
     }
 
@@ -179,9 +191,9 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
             <IonToast
                 isOpen={showToast}
                 onDidDismiss={() => setShowToast(false)}
-                message="Game successfully created!"
+                message={toastMessage}
                 duration={2000}
-                color="success"
+                color={toastColor}
                 position="bottom"
             />
         </>

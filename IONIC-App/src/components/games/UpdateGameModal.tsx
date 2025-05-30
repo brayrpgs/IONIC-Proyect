@@ -7,9 +7,10 @@ interface DeleteConfirmModalProps {
     game: Games | null;
     onClose: () => void;
     updateGames: () => void;
+    toast: React.RefObject<HTMLIonToastElement | null>;
 }
 
-const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, updateGames }) => {
+const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, updateGames, toast }) => {
 
     const title = useRef<HTMLIonInputElement>(null);
     const plataform = useRef<HTMLIonInputElement>(null);
@@ -17,7 +18,20 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
     const isCompleted = useRef<HTMLIonCheckboxElement>(null);
     const genre = useRef<HTMLIonInputElement>(null);
     const img = useRef<HTMLInputElement>(null);
-    const [showToast, setShowToast] = useState(false);
+
+    const showToast = async (
+        message: string,
+        color: "success" | "warning" | "danger",
+        duration = 2000
+    ) => {
+        if (!toast.current) return;
+        toast.current.message = message;
+        toast.current.color = color;
+        toast.current.duration = duration;
+        toast.current.isOpen = true;
+        toast.current.onDidDismiss = async () => ({ data: undefined, role: undefined });
+        await toast.current.present();
+    };
 
     useEffect(() => {
 
@@ -33,29 +47,41 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
     }, [game]);
 
     async function handleUpdate() {
-        if (title.current?.value && plataform.current?.value
-            && hoursPlayed.current?.value
-            && (img.current?.files !== null && img.current?.files !== undefined)
-            && (isCompleted.current?.checked !== undefined)
-            && genre.current?.value) {
-            const result = await UpdateGame({
-                id: game?.id || 0,
-                genre: String(genre.current?.value),
-                hoursPlayed: String(hoursPlayed.current?.value),
-                title: String(title.current?.value),
-                platform: String(plataform.current?.value),
-                image: img.current.files[0],
-                isCompleted: String(isCompleted.current?.checked)
-            })
-            if (result) {
-                console.log("Game updated successfully:", result);
+
+        try {
+            if (title.current?.value && plataform.current?.value
+                && hoursPlayed.current?.value
+                && (img.current?.files !== null && img.current?.files !== undefined)
+                && (isCompleted.current?.checked !== undefined)
+                && genre.current?.value) {
+
+                await UpdateGame({
+                    id: game?.id || 0,
+                    genre: String(genre.current?.value),
+                    hoursPlayed: String(hoursPlayed.current?.value),
+                    title: String(title.current?.value),
+                    platform: String(plataform.current?.value),
+                    image: img.current.files[0],
+                    isCompleted: String(isCompleted.current?.checked)
+                })
+
+                await showToast("Game successfully updated!", "success");
+
                 onClose();
-                setShowToast(true);
+                updateGames();
+
+            } else {
+                await showToast(
+                    "Please complete all required fields. The image upload is optional.",
+                    "warning"
+                );
+
             }
-
-        } else {
-            console.log("error");
-
+        } catch (error: any) {
+            await showToast(
+                "A game with this title already exists. Please choose a different title.",
+                "danger"
+            );
         }
     }
 
@@ -178,18 +204,7 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
                     </IonItem>
                 </IonContent>
             </IonModal>
-            <IonToast
-                isOpen={showToast}
-                onDidDismiss={() => {
-                    
-                    setShowToast(false);
-                    updateGames();
-                }}
-                message="Game successfully created!"
-                duration={2000}
-                color="success"
-                position="bottom"
-            />
+
         </>
     );
 }
