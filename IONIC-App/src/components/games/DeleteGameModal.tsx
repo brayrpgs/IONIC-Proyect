@@ -8,44 +8,31 @@ interface DeleteConfirmModalProps {
     gameName: string | null;
     onClose: () => void;
     updateGames: () => void;
-    toast: RefObject<HTMLIonToastElement | null>;
+    setMessageToast: (message: string) => void;
+    setShowToast: (showToast: boolean) => void;
+    setColorToast: (colorToast: string) => void;
 }
 
-const DeleteGameModal: React.FC<DeleteConfirmModalProps> = ({ gameId, gameName, onClose, updateGames, toast }) => {
+const DeleteGameModal: React.FC<DeleteConfirmModalProps> = ({ gameId, gameName, onClose, updateGames, setMessageToast, setShowToast, setColorToast }) => {
 
     async function deleteGame(gameId: string | null) {
         try {
-          await DeleteGame(gameId as string);
-            
-          if(toast.current) {
-            toast.current.message = "Game successfully deleted!";
-            toast.current.color = "success";
-            toast.current.duration = 2000;
-            toast.current.isOpen = true;
-            toast.current.onDidDismiss = async () => {
-                updateGames();
-                return { data: undefined, role: undefined }; 
-            };
-            await toast.current.present();
-          }
-          
-          onClose();
-          updateGames();
+            await DeleteGame(gameId as string);
+
+            setMessageToast("Game successfully deleted!");
+            setShowToast(true);
+            setColorToast("success")
+
+            onClose();
+            updateGames();
         } catch (error: any) {
-          
-            if (toast.current) {
-                toast.current.message = "Cannot delete the game because it has associated reviews.";
-                toast.current.color = "danger";
-                toast.current.duration = 2500;
-                toast.current.isOpen = true;
-                toast.current.onDidDismiss = async () => {
-                    return { data: undefined, role: undefined }; 
-                };
-                await toast.current.present();
-            }
-            
+
+            setMessageToast("Cannot delete the game because it has associated reviews.");
+            setShowToast(true);
+            setColorToast("danger")
+
         }
-      }
+    }
 
     return (
         <>
@@ -60,11 +47,13 @@ const DeleteGameModal: React.FC<DeleteConfirmModalProps> = ({ gameId, gameName, 
                 <div className="ion-margin-top ion-text-center">
                     <IonButton
                         color="danger"
+                        data-testid={`delete-confirm-button`}
                         expand="block"
                         shape="round"
                         onClick={(e) => {
                             (e.currentTarget as HTMLElement).blur()
-                            deleteGame(gameId)}}
+                            deleteGame(gameId)
+                        }}
                     >
                         Delete
                     </IonButton>
@@ -81,7 +70,7 @@ const DeleteGameModal: React.FC<DeleteConfirmModalProps> = ({ gameId, gameName, 
                     </IonButton>
                 </div>
             </div>
-            
+
         </>
     );
 }

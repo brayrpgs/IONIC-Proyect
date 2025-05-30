@@ -12,12 +12,14 @@ const Tab1: React.FC = () => {
   const [data, setData] = useState<Games[]>([])
   const [gameToDelete, setGameToDelete] = useState<Games | null>(null);
   const [gameToUpdate, setGameToUpdate] = useState<Games | null>(null);
-  const toast = useRef<HTMLIonToastElement>(null);
+  const [messageToast, setMessageToast] = useState("");
+  const [colorToast, setColorToast] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   async function handleFetchGames() {
     setData(await FetchGames())
   }
-  
+
   useEffect(() => {
     handleFetchGames()
   }, [])
@@ -43,7 +45,10 @@ const Tab1: React.FC = () => {
         </IonItem>
         {
           data.map((value, index) => (
-            <IonCard key={index}>
+            <IonCard
+              key={index}
+              data-testid={`game-card-${value.id}`}
+            >
               <IonCardHeader>
                 <IonCardTitle>🎮 {value.title}</IonCardTitle>
                 <IonCardSubtitle>🎭 Genre: {value.genre}</IonCardSubtitle>
@@ -83,6 +88,7 @@ const Tab1: React.FC = () => {
                   <IonRow >
                     <IonButton
                       fill='outline'
+                      data-testid={`delete-option-button`}
                       className='ion-button delete'
                       expand="block"
                       size='small'
@@ -98,6 +104,7 @@ const Tab1: React.FC = () => {
 
                     <IonButton
                       fill='outline'
+                      data-testid={`edit-option-button`}
                       className='ion-button edit'
                       expand="block"
                       size='small'
@@ -142,7 +149,9 @@ const Tab1: React.FC = () => {
                 setGameToDelete(null);
               }}
               updateGames={handleFetchGames}
-              toast={toast}
+              setMessageToast={setMessageToast}
+              setShowToast={setShowToast}
+              setColorToast={setColorToast}
             />
           )}
         </IonModal>
@@ -155,14 +164,24 @@ const Tab1: React.FC = () => {
                 setGameToUpdate(null);
               }}
               updateGames={handleFetchGames}
-              toast={toast}
+              setMessageToast={setMessageToast}
+              setShowToast={setShowToast}
+              setColorToast={setColorToast}
             />
           )}
         </IonModal>
 
         <IonToast
+          data-testid={`toast-message`}
           position="bottom"
-          ref={toast}
+          onDidDismiss={() => {
+            setShowToast(false);
+            handleFetchGames();
+          }}
+          isOpen={showToast}
+          duration={2000}
+          color={colorToast}
+          message={messageToast} 
         />
       </IonContent>
     </IonPage>

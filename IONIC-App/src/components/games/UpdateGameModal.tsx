@@ -7,81 +7,68 @@ interface DeleteConfirmModalProps {
     game: Games | null;
     onClose: () => void;
     updateGames: () => void;
-    toast: React.RefObject<HTMLIonToastElement | null>;
+    setMessageToast: (message: string) => void;
+    setShowToast: (showToast: boolean) => void;
+    setColorToast: (colorToast: string) => void;
 }
 
-const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, updateGames, toast }) => {
+const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, updateGames, setMessageToast, setShowToast, setColorToast }) => {
 
-    const title = useRef<HTMLIonInputElement>(null);
-    const plataform = useRef<HTMLIonInputElement>(null);
-    const hoursPlayed = useRef<HTMLIonInputElement>(null);
-    const isCompleted = useRef<HTMLIonCheckboxElement>(null);
-    const genre = useRef<HTMLIonInputElement>(null);
-    const img = useRef<HTMLInputElement>(null);
-
-    const showToast = async (
-        message: string,
-        color: "success" | "warning" | "danger",
-        duration = 2000
-    ) => {
-        if (!toast.current) return;
-        toast.current.message = message;
-        toast.current.color = color;
-        toast.current.duration = duration;
-        toast.current.isOpen = true;
-        toast.current.onDidDismiss = async () => ({ data: undefined, role: undefined });
-        await toast.current.present();
-    };
+    const [title, setTitle] = useState('');
+    const [platform, setPlatform] = useState('');
+    const [hoursPlayed, setHoursPlayed] = useState('');
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [genre, setGenre] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
 
     useEffect(() => {
-
-        if (title.current) {
-            title.current.value = game?.title;
-            plataform.current!.value = game?.platform || '';
-            hoursPlayed.current!.value = game?.hoursPlayed ? String(game.hoursPlayed) : '';
-            isCompleted.current!.checked = game?.isCompleted || false;
-            genre.current!.value = game?.genre || '';
+        if (game) {
+            setTitle(game.title || '');
+            setPlatform(game.platform || '');
+            setHoursPlayed(game.hoursPlayed ? String(game.hoursPlayed) : '');
+            setIsCompleted(game.isCompleted || false);
+            setGenre(game.genre || '');
         }
-
-
     }, [game]);
 
     async function handleUpdate() {
 
         try {
-            if (title.current?.value && plataform.current?.value
-                && hoursPlayed.current?.value
-                && (img.current?.files !== null && img.current?.files !== undefined)
-                && (isCompleted.current?.checked !== undefined)
-                && genre.current?.value) {
+            if (title && platform && hoursPlayed && genre) {
 
-                await UpdateGame({
+                const result = await UpdateGame({
                     id: game?.id || 0,
-                    genre: String(genre.current?.value),
-                    hoursPlayed: String(hoursPlayed.current?.value),
-                    title: String(title.current?.value),
-                    platform: String(plataform.current?.value),
-                    image: img.current.files[0],
-                    isCompleted: String(isCompleted.current?.checked)
-                })
+                    genre,
+                    hoursPlayed,
+                    title,
+                    platform,
+                    image: imageFile,
+                    isCompleted: String(isCompleted)
+                });
 
-                await showToast("Game successfully updated!", "success");
+                if (result) {
+                    setMessageToast("Game successfully updated!");
+                    setShowToast(true);
+                    setColorToast("success")
 
-                onClose();
-                updateGames();
+                    onClose();
+                    updateGames();
+                } else {
+                    setMessageToast("An error has ocurred while updating the game. Try again!");
+                    setShowToast(true);
+                    setColorToast("danger")
+                }
 
             } else {
-                await showToast(
-                    "Please complete all required fields. The image upload is optional.",
-                    "warning"
-                );
+                setMessageToast("Please complete all required fields. The image upload is optional.");
+                setShowToast(true);
+                setColorToast("warning")
 
             }
         } catch (error: any) {
-            await showToast(
-                "A game with this title already exists. Please choose a different title.",
-                "danger"
-            );
+            setMessageToast("A game with this title already exists. Please choose a different title.");
+            setShowToast(true);
+            setColorToast("danger")
         }
     }
 
@@ -89,6 +76,7 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
         <>
             <IonModal
                 className='ion-modal showContent'
+                data-testid={`update-modal`}
                 isOpen={true}
                 showBackdrop={false}
             >
@@ -117,6 +105,7 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
 
                             <IonButton
                                 strong={true}
+                                data-testid={`update-confirm-button`}
                                 onClick={(e) => {
                                     (e.currentTarget as HTMLElement).blur()
                                     handleUpdate();
@@ -133,46 +122,51 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
                     <IonItem >
                         <IonInput
                             label="Title"
+                            data-testid="update-title-input"
                             labelPlacement="floating"
                             type="text"
                             placeholder="Title game?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            value={game?.title || ''}
-                            ref={title}
+                            value={title}
+                            onIonChange={(e) => setTitle(e.detail.value!)}
                         />
                     </IonItem>
 
                     <IonItem>
                         <IonInput
                             label="Platform"
+                            data-testid="update-platform-input"
                             labelPlacement="floating"
                             type="text"
                             placeholder="Platform game?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            value={game?.platform || ''}
-                            ref={plataform}
+                            value={platform}
+                            onIonChange={(e) => setPlatform(e.detail.value!)}
                         />
                     </IonItem>
 
                     <IonItem>
                         <IonInput
                             label="Hours Played"
+                            data-testid="update-hours-played-input"
                             labelPlacement="floating"
                             type="number"
                             placeholder="Hours Played?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            value={game?.hoursPlayed ? String(game.hoursPlayed) : ''}
-                            ref={hoursPlayed}
+                            value={hoursPlayed}
+                            onIonChange={(e) => setHoursPlayed(e.detail.value!)}
                         />
                     </IonItem>
 
                     <IonItem>
                         <IonCheckbox
                             checked={game?.isCompleted || false}
-                            ref={isCompleted}
+                            data-testid="update-is-completed-checkbox"
+                            value={isCompleted}
+                            onIonChange={(e) => setIsCompleted(e.detail.checked)}
                         >
                             is Completed?
                         </IonCheckbox>
@@ -181,13 +175,14 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
                     <IonItem>
                         <IonInput
                             label="Genre"
+                            data-testid="update-genre-input"
                             labelPlacement="floating"
                             type="text"
                             placeholder="Genre game?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            value={game?.genre || ''}
-                            ref={genre}
+                            value={genre}
+                            onIonChange={(e) => setGenre(e.detail.value!)}
                         />
                     </IonItem>
 
@@ -195,11 +190,11 @@ const UpdateGameModal: React.FC<DeleteConfirmModalProps> = ({ game, onClose, upd
                         <label htmlFor="imageInput" >Image?</label>
                         <input
                             id="imageInput"
+                            data-testid="update-image-input"
                             type="file"
                             accept="image/*"
                             style={{ padding: '8px' }}
-                            onChange={() => { }}
-                            ref={img}
+                            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                         />
                     </IonItem>
                 </IonContent>

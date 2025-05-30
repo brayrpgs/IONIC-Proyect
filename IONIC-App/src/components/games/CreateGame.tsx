@@ -1,4 +1,4 @@
-import  { Dispatch, SetStateAction, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { IonButton, IonButtons, IonCheckbox, IonContent, IonHeader, IonIcon, IonInput, IonItem, IonModal, IonTitle, IonToast, IonToolbar } from '@ionic/react';
 import { addCircleOutline, closeCircleOutline } from 'ionicons/icons';
 import "./CreateGame.css"
@@ -7,16 +7,17 @@ import { Games, SendGame } from '../../utils/Connections';
 
 function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[]>>, data: Games[] }) {
     const modal = useRef<HTMLIonModalElement>(null);
-    const title = useRef<HTMLIonInputElement>(null);
-    const plataform = useRef<HTMLIonInputElement>(null);
-    const hoursPlayed = useRef<HTMLIonInputElement>(null);
-    const isCompleted = useRef<HTMLIonCheckboxElement>(null);
-    const genre = useRef<HTMLIonInputElement>(null);
     const img = useRef<HTMLInputElement>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [toastColor, setToastColor] = useState("");
+    const [title, setTitle] = useState('');
+    const [platform, setPlatform] = useState('');
+    const [hoursPlayed, setHoursPlayed] = useState('');
+    const [isCompleted, setIsCompleted] = useState(false);
+    const [genre, setGenre] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
 
     function showCustomToast(message: string, color: string) {
         setToastMessage(message);
@@ -26,25 +27,35 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
 
     const handlerSend = async () => {
         try {
-            if (title.current?.value && plataform.current?.value
-                && hoursPlayed.current?.value
-                && (img.current?.files && img.current.files.length > 0)
-                && (isCompleted.current?.checked !== undefined)
-                && genre.current?.value) {
-                const result = await SendGame({
-                    id: 0,
-                    genre: String(genre.current?.value),
-                    hoursPlayed: String(hoursPlayed.current?.value),
-                    title: String(title.current?.value),
-                    platform: String(plataform.current?.value),
-                    image: img.current.files[0],
-                    isCompleted: String(isCompleted.current?.checked)
-                })
-                if (result) {
-                    setData([...data, result])
-                    showCustomToast("Game successfully created!", "success");
-                    setIsOpen(false)
-                    modal.current?.dismiss()
+            if (title && platform && hoursPlayed && imageFile && genre) {
+                try {
+                    const result = await SendGame({
+                        id: 0,
+                        genre,
+                        hoursPlayed,
+                        title,
+                        platform,
+                        image: imageFile,
+                        isCompleted: String(isCompleted),
+                    });
+
+                    if (result) {
+                        setData([...data, result]);
+                        setShowToast(true);
+                        setIsOpen(false);
+                        setTitle('');
+                        setPlatform('');
+                        setHoursPlayed('');
+                        setIsCompleted(false);
+                        setGenre('');
+                        setImageFile(null);
+                        if (img.current) img.current.value = '';
+                        showCustomToast("Game successfully created!", "success");
+                        setIsOpen(false)
+                        modal.current?.dismiss()
+                    }
+                } catch (error) {
+                    console.error('HandlerSend: SendGame failed:', error);
                 }
 
             } else {
@@ -60,6 +71,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
         <>
             <IonButton
                 id="open-modal"
+                data-testid={`create-option-button`}
                 expand="block"
                 size='large'
                 fill='outline'
@@ -76,6 +88,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
 
             <IonModal
                 className='ion-modal showContent'
+                data-testid={`create-modal`}
                 trigger="open-modal"
                 onWillDismiss={() => { setIsOpen(false) }}
                 isOpen={isOpen}
@@ -108,6 +121,7 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
 
                             <IonButton
                                 strong={true}
+                                data-testid={`create-confirm-button`}
                                 onClick={handlerSend}
                             >
                                 Confirm
@@ -120,44 +134,52 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
                 <IonContent className="ion-content showContent">
                     <IonItem >
                         <IonInput
+                            data-testid="create-title-input"
                             label="Title"
                             labelPlacement="floating"
                             type="text"
                             placeholder="Title game?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            ref={title}
+                            value={title}
+                            onIonChange={(e) => setTitle(e.detail.value!)}
                         />
                     </IonItem>
 
                     <IonItem>
                         <IonInput
+                            data-testid="create-platform-input"
                             label="Platform"
                             labelPlacement="floating"
                             type="text"
                             placeholder="Platform game?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            ref={plataform}
+                            value={platform}
+                            onIonChange={(e) => setPlatform(e.detail.value!)}
                         />
                     </IonItem>
 
                     <IonItem>
                         <IonInput
+                            data-testid="create-hours-played-input"
                             label="Hours Played"
                             labelPlacement="floating"
                             type="number"
                             placeholder="Hours Played?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            ref={hoursPlayed}
+                            value={hoursPlayed}
+                            onIonChange={(e) => setHoursPlayed(e.detail.value!)}
                         />
                     </IonItem>
 
                     <IonItem>
                         <IonCheckbox
+                            data-testid="create-is-completed-checkbox"
                             checked={false}
-                            ref={isCompleted}
+                            value={isCompleted}
+                            onIonChange={(e) => setIsCompleted(e.detail.checked)}
                         >
                             is Completed?
                         </IonCheckbox>
@@ -165,13 +187,15 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
 
                     <IonItem>
                         <IonInput
+                            data-testid="create-genre-input"
                             label="Genre"
                             labelPlacement="floating"
                             type="text"
                             placeholder="Genre game?"
                             clearInput={true}
                             clearInputIcon={closeCircleOutline}
-                            ref={genre}
+                            value={genre}
+                            onIonChange={(e) => setGenre(e.detail.value!)}
                         />
                     </IonItem>
 
@@ -179,16 +203,18 @@ function CreateGame({ setData, data }: { setData: Dispatch<SetStateAction<Games[
                         <label htmlFor="imageInput" >Image</label>
                         <input
                             id="imageInput"
+                            data-testid="create-image-input"
                             type="file"
                             accept="image/*"
                             style={{ padding: '8px' }}
-                            onChange={() => { }}
+                            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                             ref={img}
                         />
                     </IonItem>
                 </IonContent>
             </IonModal>
             <IonToast
+                data-testid="toast-game-created"
                 isOpen={showToast}
                 onDidDismiss={() => setShowToast(false)}
                 message={toastMessage}
