@@ -38,7 +38,7 @@ npm i
 > - ✅ Official Ionic extension for VSCode:  
 >   [🔗 Ionic Extension - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ionic.ionic)
 >
->   > After installing the extension, click the **"Run on Web"** button to launch the project.
+>   > After installing the extension, click the **"Run on Web🌐"** button to launch the project.
 
 ---
 
