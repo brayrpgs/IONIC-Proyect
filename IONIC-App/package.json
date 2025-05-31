@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test.e2e": "cypress run",
-    "test": "vitest --ui",
+    "test": "vitest",
     "lint": "eslint"
   },
   "dependencies": {
