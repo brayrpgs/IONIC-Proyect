@@ -20,10 +20,14 @@ jobs:
           node-version: 22
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: |
+          cd IONIC-App
+          npm install
 
       - name: 🔍 Run tests
-        run: npm test
+        run: |
+          cd IONIC-App
+          npm test
 
       # Notification if tests fail
       - name: ❌ Tests failed notification
