@@ -31,4 +31,5 @@ export const newMockGame: Games = {
   hoursPlayed: 50,
   isCompleted: true,
   genre: 'Metroidvania',
+  
 };
