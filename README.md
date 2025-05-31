@@ -57,3 +57,10 @@ In the extension press the run on web button
 Check the [🔗 Readme.md](https://github.com/KendallFallas07/Investigation-Project-API/blob/main/README.md) file inside the backend subproject (if available) for backend setup instructions.  
 > 📌 Ensure the backend is running before testing features that rely on it.
 
+
+## Informational / Tutorial video
+
+You can see this video for more information about the app:
+
+[Link](https://youtu.be/ddtKR_wazk8) 
+
